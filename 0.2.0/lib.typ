@@ -1,3 +1,7 @@
+#import "@preview/ez-today:2.1.0"
+#import "translations.typ": *
+
+
 #let colors = (
   text: rgb("#333333"),
   muted: rgb("#757575"),
@@ -39,8 +43,14 @@
   paper: "a4",
   accent-color: colors.accent,
   cover-image: none,
+  translations: none,
   body
 ) = {
+  // Add translation if exists
+  if translations != none {
+    update-translation(translations)
+  }
+
   set document(title: title, author: author)
   set page(
     paper: paper,
@@ -116,7 +126,7 @@
       ]
       
       #place(bottom + center)[
-         #pad(bottom: 3cm, text(font: fonts.header, size: 0.8em, tracking: 3pt, fill: colors.muted, upper(date.display("[month repr:long] [year]"))))
+         #pad(bottom: 3cm, text(font: fonts.header, size: 0.8em, tracking: 3pt, fill: colors.muted, upper(ez-today.today(lang: text.lang, format: "M Y"))))
       ]
     ]
   }
@@ -125,7 +135,7 @@
   page(header: none)[
     #v(3cm)
     #align(center)[
-       #text(font: fonts.header, weight: "bold", size: 1.2em, tracking: 2pt, fill: colors.accent, upper("Contents"))
+       #text(font: fonts.header, weight: "bold", size: 1.2em, tracking: 2pt, fill: colors.accent, upper(translate(i18n.toc)))
        #v(1em)
        #line(length: 3cm, stroke: 0.5pt + colors.muted)
     ]
@@ -143,7 +153,7 @@
         v(0.5em)
         box(width: 100%)[
           #text(font: fonts.body, size: 1.1em, fill: colors.text, it.element.body)
-          #box(width: 1fr, repeat[ #h(0.3em) #text(fill: colors.line.darken(20%), size: 0.6em)[.] #h(0.3em) ]) 
+          #box(width: 1fr, repeat[ #h(0.3em) #text(fill: colors.line.darken(20%), size: 0.6em)[.] #h(0.3em) ])
           #text(font: fonts.header, weight: "bold", fill: colors.muted, context it.element.location().page())
         ]
       }
@@ -215,7 +225,7 @@
         width: 100%,
         stroke: 0.5pt + colors.line.darken(5%),
       )[
-        #text(font: fonts.header, weight: "bold", size: 1.1em, fill: colors.text, "INGREDIENTS")
+        #text(font: fonts.header, weight: "bold", size: 1.1em, fill: colors.text, translate(i18n.ingredients))
         #v(0.8em)
         #set text(size: 0.95em)
         
@@ -238,7 +248,7 @@
 
       if notes != none {
         v(1.5em)
-        text(font: fonts.header, size: 0.9em, weight: "bold", fill: colors.accent, "CHEF'S NOTE")
+        text(font: fonts.header, size: 0.9em, weight: "bold", fill: colors.accent, translate(i18n.notes))
         v(0.3em)
         text(style: "italic", size: 0.9em, fill: colors.muted, notes)
       }
@@ -246,7 +256,7 @@
 
     // -- Right Column: Instructions --
     {
-      text(font: fonts.header, weight: "bold", size: 1.1em, fill: colors.text, "PREPARATION")
+      text(font: fonts.header, weight: "bold", size: 1.1em, fill: colors.text, translate(i18n.preparation))
       v(1em)
       
       set enum(

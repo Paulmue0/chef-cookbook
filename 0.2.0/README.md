@@ -32,6 +32,7 @@ This is the main show rule that sets up the document structure, cover page, and 
   paper: "a4",                   // Optional: Defaults to "a4"
   accent-color: rgb("#D9534F"),  // Optional: Defaults to a warm red
   cover-image: none,             // Optional: Image content for the cover
+  translations: none             // Optional: Custom Translation
 )
 ```
 
@@ -67,6 +68,56 @@ Ingredients can be specified as a list containing either:
 
 - **Strings**: Simple text (e.g., "Salt").
 - **Dictionaries**: Structured data with `amount` and `name` keys (e.g., `(amount: "1 cup", name: "Milk")`).
+
+## Languages
+This package read the languages that you have chosen with :
+```typ
+#set text(lang:"en") // or 
+```
+If you don't do that, the defalut language is English.
+There is currently 4 languages available in this package:
+- English
+- French
+- Spanish
+- Portuguese
+
+If your language is not in this list you can add your own like this :
+
+```typ
+#set text(lang:"fr") // If not set the language for your document, chef-cookbook will keep the english labels
+
+// This example is one of the four who currently exists
+#let french = (
+    fr: (
+      toc: "Table des Matières",
+      ingredients: "INGRÉDIENTS",
+      preparation: "PRÉPARATION",
+      notes: "NOTES DU CHEF"
+    )
+)
+
+#show: cookbook.with(
+  ... //All the other options
+  translations: french
+)
+```
+If you want to replace the labels already provided by yours, you can do the same thing with one of the 4 languages provided like this: 
+
+```typ
+#let custom-english = (
+    en: (
+      toc: "Contents",
+      ingredients: "FURNITURES",
+      preparation: "STEPS",
+      notes: "TIPS"
+    )
+)
+
+#show: cookbook.with(
+  ... //All the other options
+  translations: custom-english
+)
+
 
 ## License
 
