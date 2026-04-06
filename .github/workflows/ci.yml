@@ -61,4 +61,5 @@ jobs:
       - name: Compile template
         run: |
           version="${{ steps.version.outputs.version }}"
+          mkdir -p build
           typst compile --root "$version" "$version/template/main.typ" build/template.pdf
