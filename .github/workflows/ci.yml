@@ -61,4 +61,4 @@ jobs:
       - name: Compile template
         run: |
           version="${{ steps.version.outputs.version }}"
-          typst compile "$version/template/main.typ" /dev/null
+          typst compile "$version/template/main.typ" build/template.pdf
