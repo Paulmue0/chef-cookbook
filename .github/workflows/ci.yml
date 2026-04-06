@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install typst
+        uses: typst-community/setup-typst@v4
+
+      - name: Detect current version
+        id: version
+        run: |
+          # The latest version folder is the source of truth
+          version=$(ls -d [0-9]*/ | sort -V | tail -1 | tr -d '/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $version"
+
+      - name: Check version consistency
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          dir="$version"
+          errors=0
+
+          # typst.toml version must match folder name
+          toml_version=$(grep '^version' "$dir/typst.toml" | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+          if [ "$toml_version" != "$version" ]; then
+            echo "::error::typst.toml version ($toml_version) does not match folder name ($version)"
+            errors=$((errors + 1))
+          fi
+
+          # README should reference the current version
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/README.md"; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/README.md" | grep -v "chef-cookbook:$version" || true)
+            if [ -n "$bad_refs" ]; then
+              echo "::error::README.md references outdated version(s): $bad_refs"
+              errors=$((errors + 1))
+            fi
+          fi
+
+          # template/main.typ should reference the current version
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/template/main.typ"; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/template/main.typ" | grep -v "chef-cookbook:$version" || true)
+            if [ -n "$bad_refs" ]; then
+              echo "::error::template/main.typ references outdated version(s): $bad_refs"
+              errors=$((errors + 1))
+            fi
+          fi
+
+          if [ "$errors" -gt 0 ]; then
+            exit 1
+          fi
+          echo "All version references are consistent."
+
+      - name: Compile template
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          typst compile "$version/template/main.typ" /dev/null
