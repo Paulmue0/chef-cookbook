@@ -17,38 +17,29 @@ jobs:
       - name: Detect current version
         id: version
         run: |
-          # The latest version folder is the source of truth
-          version=$(ls -d [0-9]*/ | sort -V | tail -1 | tr -d '/')
+          version=$(grep '^version' typst.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Detected version: $version"
 
       - name: Check version consistency
         run: |
           version="${{ steps.version.outputs.version }}"
-          dir="$version"
           errors=0
 
-          # typst.toml version must match folder name
-          toml_version=$(grep '^version' "$dir/typst.toml" | head -1 | sed 's/.*= *"\(.*\)"/\1/')
-          if [ "$toml_version" != "$version" ]; then
-            echo "::error::typst.toml version ($toml_version) does not match folder name ($version)"
-            errors=$((errors + 1))
-          fi
-
           # README should reference the current version
-          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/README.md"; then
-            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/README.md" | grep -v "chef-cookbook:$version" || true)
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' README.md; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' README.md | grep -v "chef-cookbook:$version" || true)
             if [ -n "$bad_refs" ]; then
               echo "::error::README.md references outdated version(s): $bad_refs"
               errors=$((errors + 1))
             fi
           fi
 
-          # template/main.typ should reference the current version
-          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/template/main.typ"; then
-            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' "$dir/template/main.typ" | grep -v "chef-cookbook:$version" || true)
+          # docs/template/main.typ should reference the current version
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' docs/template/main.typ; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' docs/template/main.typ | grep -v "chef-cookbook:$version" || true)
             if [ -n "$bad_refs" ]; then
-              echo "::error::template/main.typ references outdated version(s): $bad_refs"
+              echo "::error::docs/template/main.typ references outdated version(s): $bad_refs"
               errors=$((errors + 1))
             fi
           fi
@@ -60,6 +51,5 @@ jobs:
 
       - name: Compile template
         run: |
-          version="${{ steps.version.outputs.version }}"
           mkdir -p build
-          typst compile --root "$version" "$version/template/main.typ" build/template.pdf
+          typst compile --root . docs/template/main.typ build/template.pdf
