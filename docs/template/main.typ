@@ -1,4 +1,4 @@
-// #import "@preview/chef-cookbook:0.2.0": *
+// #import "@preview/chef-cookbook:0.3.0": *
 #import "../../src/lib.typ": *
 
 #show: cookbook.with(

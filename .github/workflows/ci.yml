@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install typst
+        uses: typst-community/setup-typst@v4
+
+      - name: Detect current version
+        id: version
+        run: |
+          version=$(grep '^version' typst.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $version"
+
+      - name: Check version consistency
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          errors=0
+
+          # README should reference the current version
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' README.md; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' README.md | grep -v "chef-cookbook:$version" || true)
+            if [ -n "$bad_refs" ]; then
+              echo "::error::README.md references outdated version(s): $bad_refs"
+              errors=$((errors + 1))
+            fi
+          fi
+
+          # docs/template/main.typ should reference the current version
+          if grep -qP 'chef-cookbook:\d+\.\d+\.\d+' docs/template/main.typ; then
+            bad_refs=$(grep -oP 'chef-cookbook:\d+\.\d+\.\d+' docs/template/main.typ | grep -v "chef-cookbook:$version" || true)
+            if [ -n "$bad_refs" ]; then
+              echo "::error::docs/template/main.typ references outdated version(s): $bad_refs"
+              errors=$((errors + 1))
+            fi
+          fi
+
+          if [ "$errors" -gt 0 ]; then
+            exit 1
+          fi
+          echo "All version references are consistent."
+
+      - name: Compile template
+        run: |
+          mkdir -p build
+          typst compile --root . docs/template/main.typ build/template.pdf
