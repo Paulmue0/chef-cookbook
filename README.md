@@ -1,6 +1,6 @@
 # Chef Cookbook
 
->A clear and minimal Typst template for creating recipe collections and cookbooks.
+> A clear and minimal Typst template for creating recipe collections and cookbooks.
 
 ![Thumbnail](thumbnail.png)
 
@@ -43,6 +43,8 @@ Use this function to add a recipe to your cookbook.
 #recipe(
   "Recipe Name",
   description: [Short description of the dish.],
+  cuisine: "Italian",                // Optional: displayed with a globe icon
+  tags: ("pasta", "quick", "easy"),  // Optional: rendered as pill badges
   servings: "4 servings",
   prep-time: "20m",
   cook-time: "40m",
@@ -51,6 +53,11 @@ Use this function to add a recipe to your cookbook.
     (amount: "2", name: "Eggs"),
     "Salt",
     "Pepper",
+  ),
+  utensils: (
+    "Large mixing bowl",
+    "Whisk",
+    "Baking sheet",
   ),
   instructions: [
     + First step...
@@ -67,6 +74,59 @@ Ingredients can be specified as a list containing either:
 
 - **Strings**: Simple text (e.g., "Salt").
 - **Dictionaries**: Structured data with `amount` and `name` keys (e.g., `(amount: "1 cup", name: "Milk")`).
+
+## Utensils Format
+
+Utensils are specified as a list of strings. They are rendered in the recipe sidebar with a utensil icon and accent-colored left border.
+
+```typ
+utensils: (
+  "Large pot",
+  "Wooden spoon",
+  "Blender",
+)
+```
+
+## Notes
+
+The `notes` parameter on `recipe()` renders a styled callout box in the sidebar below the ingredients, with a lightbulb icon and accent-colored left border.
+
+## Cuisine & Tags
+
+Recipes can optionally include metadata for cuisine type and tags:
+
+- **`cuisine`** (string): Displayed in the recipe header next to a globe icon. Use it to indicate the origin or style of the dish (e.g., `"Italian"`, `"Japanese"`).
+- **`tags`** (list of strings): Rendered as small pill badges below the recipe header, next to a tag icon. Useful for categorising recipes by dietary info, meal type, etc.
+
+```typ
+#recipe(
+  "Pasta Primavera",
+  cuisine: "Italian",
+  tags: ("vegetarian", "pasta", "quick"),
+  // ... other params
+)
+```
+
+Both parameters are optional and recipes without them render exactly as before.
+
+## Named Sections
+
+To divide preparation steps into named groups, pass a dictionary to `instructions` instead of plain content. Each key becomes a section heading:
+
+```typ
+instructions: (
+  "For the dough": [
+    + Mix flour and eggs...
+    + Knead for 10 minutes...
+  ],
+  "For the sauce": [
+    + Heat olive oil...
+    + Add garlic...
+  ],
+)
+```
+
+Each section renders as an accent-colored uppercase label with a decorative underline, visually separating groups of steps within the preparation column. Plain content is still supported for recipes without sections.
 
 ## Internationalization (i18n)
 
@@ -110,13 +170,19 @@ If a language is missing or you wish to override specific terms (e.g., using "Co
       collection: "Sbírka od ",
       contents: "Obsah",
       ingredients: "INGREDIENCE",
+      utensils: "NÁČINÍ",
       chefs-note: "POZNÁMKA ŠÉFKUCHAŘE",
+      note: "POZNÁMKA",
       preparations: "PŘÍPRAVA",
     ),
   )
 )
 
 ```
+
+## Development
+
+For development guide, see [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
 
 ## License
 

@@ -1,7 +1,7 @@
 [package]
 name = "chef-cookbook"
-version = "0.1.0"
-entrypoint = "lib.typ"
+version = "0.3.0"
+entrypoint = "src/lib.typ"
 authors = ["PaulMue0 <https://paulpelikan.de>"]
 license = "MIT"
 description = "Create simple recipe collections and cookbooks."
@@ -12,6 +12,6 @@ compiler = "0.13.1"
 exclude = ["example.pdf", ".gitignore", "thumbnail.pdf"]
 
 [template]
-path = "template"
+path = "docs/template"
 entrypoint = "main.typ"
 thumbnail = "thumbnail.png"
